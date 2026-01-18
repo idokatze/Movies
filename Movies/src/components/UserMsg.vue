@@ -8,7 +8,7 @@
     import { eventBus } from '@/services/event-bus.service'
 
     export default {
-        name: '',
+        name: 'UserMsg',
         props: {},
         emits: [],
         components: {},

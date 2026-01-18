@@ -2,22 +2,6 @@
     <section v-if="!movie">Loading...</section>
     <section v-else class="form-container">
         <form class="edit-movie-form" @submit.prevent="onSaveMovie">
-            <div class="poster-container">
-                <img
-                    :src="movie.posterUrl || '/fallback.jpg'"
-                    @error="$event.target.src = '/fallback.jpg'"
-                    alt="Movie Poster"
-                    class="card-img"
-                />
-                <button
-                    v-if="!movie.posterUrl"
-                    type="button"
-                    @click="getPoster"
-                >
-                    Get Poster
-                </button>
-            </div>
-
             <label for="movie-title">Title</label>
             <input v-model="movie.title" type="text" id="movie-title" />
 
@@ -28,8 +12,18 @@
                 id="movie-release"
             />
 
+            <label for="running-time">Running Time</label>
+            <input
+                v-model="movie.runningTime"
+                type="number"
+                id="running-time"
+            />
+
             <label for="movie-director">Director</label>
             <input v-model="movie.director" type="text" id="movie-director" />
+
+            <label for="movie-genre">Genre</label>
+            <input v-model="movie.genre" type="text" id="movie-genre" />
 
             <div class="actor-input-container">
                 <input
@@ -58,6 +52,24 @@
                 </div>
             </div>
 
+            <div class="poster-container">
+                <img
+                    :src="movie.posterUrl || fallbackPoster"
+                    class="poster-img"
+                    alt="Movie Poster"
+                    @error="onPosterError"
+                />
+
+                <button
+                    v-if="!movie.posterUrl"
+                    type="button"
+                    @click="getPoster"
+                    class="btn-tertary"
+                >
+                    Get Poster
+                </button>
+            </div>
+
             <div class="actions">
                 <RouterLink to="/movie" class="btn-secondary">
                     Back
@@ -72,6 +84,10 @@
 <script>
     // Imports:
     import { movieService } from '@/services/movie.service.js'
+    import {
+        showSuccessMsg,
+        showErrorMsg,
+    } from '@/services/event-bus.service.js'
 
     export default {
         name: '',
@@ -82,6 +98,8 @@
             return {
                 movie: null,
                 newActor: '',
+                posterError: false,
+                fallbackPoster: '/fallback.jpg',
             }
         },
         computed: {},
@@ -111,8 +129,25 @@
                 this.movie.actors.splice(index, 1)
             },
             async onSaveMovie() {
-                await movieService.save(this.movie)
-                this.$router.push('/movie')
+                try {
+                    await movieService.save(this.movie)
+                    this.$router.push('/movie')
+                    showSuccessMsg(`Movie successfully saved`)
+                } catch (error) {
+                    showErrorMsg(`Couldn't delete movie`)
+                }
+            },
+            async getPoster() {
+                const title = this.movie.title?.trim()
+                if (!title) return
+
+                const posterUrl = await movieService.getMoviePoster(title)
+                this.movie.posterUrl = posterUrl || ''
+            },
+
+            onPosterError(e) {
+                e.target.src = this.fallbackPoster
+                this.movie.posterUrl = ''
             },
         },
         beforeUnmount() {},
@@ -163,6 +198,30 @@
         outline: none;
     }
 
+    .poster-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1em;
+
+        /* Tertary Button (Add Poster) */
+        .btn-tertary {
+            padding: 0.5em 1em;
+            border: none;
+            border-radius: 10px;
+            background-color: rgb(76, 76, 221);
+            color: white;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-tertary:hover {
+            background-color: navy;
+        }
+
+        .btn-tertary:active {
+            transform: scale(0.97);
+        }
+    }
     /* ===== Actor Input ===== */
     .actor-input-container {
         margin-top: 0.5em;

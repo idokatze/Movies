@@ -47,7 +47,6 @@
                 }
             },
             async onRemoveMovie(movieId) {
-                console.log('movieId:', movieId)
                 try {
                     await movieService.remove(movieId)
                     this.loadMovies()
