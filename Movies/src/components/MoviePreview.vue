@@ -1,3 +1,4 @@
+˝
 <template>
     <article class="movie-card">
         <img
@@ -11,14 +12,16 @@
             <p class="release-year">{{ movie.releaseYear }}</p>
         </div>
         <div class="actions">
-            <RouterLink :to="`movie/${movie._id}`"
-                ><button class="open-details pill-btn">
-                    Details
-                </button></RouterLink
+            <RouterLink
+                :to="`/movie/${movie._id}`"
+                class="pill-btn open-details"
             >
+                Details
+            </RouterLink>
+
             <button
                 @click="$emit('remove', movie._id)"
-                class="remove-movie pill-btn"
+                class="pill-btn remove-movie"
             >
                 Delete
             </button>
