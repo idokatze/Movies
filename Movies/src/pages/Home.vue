@@ -8,11 +8,13 @@
         <main class="main-content">
             <button @click="greet" class="btn">Say Hello</button>
             <p v-if="message">{{ message }}</p>
-        </main>
 
-        <footer class="footer">
-            <p>© 2026 My Elegant Home</p>
-        </footer>
+            <div class="counter-container">
+                <button @click="onDecrement">Decrement</button>
+                <p>{{ count }}</p>
+                <button @click="onIncrement">Increment</button>
+            </div>
+        </main>
     </div>
 </template>
 
@@ -27,6 +29,17 @@
         methods: {
             greet() {
                 this.message = 'Hello! Welcome to your home page 🌿'
+            },
+            onIncrement() {
+                this.$store.commit({ type: 'change', diff: 1 })
+            },
+            onDecrement() {
+                this.$store.commit({ type: 'change', diff: -1 })
+            },
+        },
+        computed: {
+            count() {
+                return this.$store.getters.count
             },
         },
     }
