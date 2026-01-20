@@ -17,6 +17,11 @@
     } from '@/services/event-bus.service.js'
 
     export default {
+        data() {
+            return {
+                filterBy: {},
+            }
+        },
         name: 'MovieIndex',
         props: {},
         emits: [],
@@ -24,40 +29,35 @@
             MovieList,
             Filter,
         },
-        data() {
-            return {
-                movies: [],
-                filterBy: {
-                    txt: '',
-                    maxRunTime: 0,
-                },
-            }
+        computed: {
+            movies() {
+                return this.$store.getters.movies || []
+            },
         },
-        computed: {},
         watch: {},
-        created() {
-            this.loadMovies()
+        async created() {
+            await this.loadMovies()
         },
         methods: {
-            async loadMovies() {
+            async loadMovies(filterBy = {}) {
                 try {
-                    this.movies = await movieService.query(this.filterBy)
+                    await this.$store.dispatch('loadMovies', {
+                        filterBy: this.filterBy,
+                    })
                 } catch (error) {
                     console.error('Could not load movies:', error)
                 }
             },
             async onRemoveMovie(movieId) {
                 try {
-                    await movieService.remove(movieId)
-                    this.loadMovies()
+                    await this.$store.dispatch('removeMovie', movieId)
                     showSuccessMsg(`Movie ${movieId} deleted`)
                 } catch (err) {
                     showErrorMsg(`Couldn't delete movie`)
                 }
             },
             onFilter(filterBy) {
-                this.filterBy = { ...this.filterBy, ...filterBy }
-                this.loadMovies()
+                this.$store.dispatch('setFilterBy', { filterBy })
             },
         },
 
